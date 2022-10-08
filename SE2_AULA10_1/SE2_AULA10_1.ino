@@ -14,7 +14,7 @@ String newHostname = "TB-G1"; // Substitua X pela letra da sua turma e Y pelo n√
 WiFiServer server(80);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200); 
 
   // Prepara o LED
   pinMode(LED_BUILTIN, OUTPUT);
