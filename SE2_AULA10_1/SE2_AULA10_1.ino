@@ -1,14 +1,17 @@
 #include <ESP8266WiFi.h>
 
 #ifndef STASSID
-#define STASSID "REDETESTE"
-#define STAPSK  "REDETESTE"
+#define STASSID "SE-II"
+#define STAPSK  "etecjb*123"
 #endif
+
+#define D7 13 // Nao aceitou a constante D7, por isso ela foi definida com o numero do pino
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
 String newHostname = "TB-G1"; // Substitua X pela letra da sua turma e Y pelo número do seu grupo
+int acumula0 = 0;
 
 // Criar uma instancia do servidor e qual porta será usada
 WiFiServer server(80);
@@ -19,6 +22,8 @@ void setup() {
   // Prepara o LED
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, 0);
+
+  pinMode(D7, OUTPUT);
 
   // Conecta a rede WIFI
   Serial.println();
@@ -65,7 +70,11 @@ void loop() {
     val = 1;
   } else if (req.indexOf(F("?Liga=")) != -1) {
     val = 0;
-  } else {
+  } else if (req.indexOf(F("?envia=")) != -1){ 
+    tiraNum(req);
+    Serial.println("deu PWM");
+  }else {
+  
     Serial.println(F("Requisicao invalida"));
     val = digitalRead(LED_BUILTIN);
   }
@@ -82,6 +91,7 @@ void loop() {
   // Envia a resposta ao cliente
   client.print(F("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n "));
   client.print(F("<h1><html style=\"font-size:14px\"> Menu ESP8266 \n</h1>"));
+  client.print(F("<br><br><b><h1>Integrantes: </b>Josicleide, Kaua, Larissa, Sergio e Roberto</h1>")); // Integrantes do grupo
   client.print(F("<body>\n"));
   client.print(F("<form action=\"http://"));
   
@@ -92,8 +102,16 @@ void loop() {
   client.print(F("<p></p><button input name=\"Desliga\"style=\"height:20px;width:150px;font-size:13px\" >Desligar</button>"));//<br></br>
   client.print(F("<button input name=\"Liga\" style=\"height:20px;width:150px;font-size:13px\" >Ligar</button>"));
   client.print(F("<p></p>"));
+  client.print(F("<b><br></br><html style=\"font-size:14px\"> Enviar comandos para a sa&iacute;da PWM\n</b>"));
+  client.print(F("<p></p>"));
+  
+  client.print(F("<button input name=\"envia\"style=\"height:20px;width:150px;font-size:13px\" >Enviar</button>"));
+  client.print(F(" Estado do Led: <input name=\"PWM\" Value=\""));
+  client.print(acumula0);
+  client.print(F("\"maxlength=15 style=\"height:25px;width:75px;font-size:13px\" \">"));
+  client.print(F("<p></p>"));
+
   client.print(F("</form>\n"));
-  client.print(F("<br><br><b>Integrantes: </b>Josicleide, Kaua, Larissa, Sergio e Roberto")); // Integrantes do grupo
   client.print(F("</body>\n"));
   client.print(F("</html>"));
 
